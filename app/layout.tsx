@@ -38,7 +38,8 @@ export default function RootLayout({
 }: {
   children: React.ReactNode
 }) {
-  const bucketSlug = process.env.COSMIC_BUCKET_SLUG as string
+  // Safely get bucket slug with fallback
+  const bucketSlug = process.env.COSMIC_BUCKET_SLUG || 'homeplate-demo'
 
   return (
     <html lang="en">

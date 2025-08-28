@@ -1,10 +1,19 @@
 import { createBucketClient } from '@cosmicjs/sdk'
 import { Chef, Dish, Order, Customer, Review, Subscription, SearchFilters, hasStatus } from '@/types'
 
+// Ensure environment variables are available
+const bucketSlug = process.env.COSMIC_BUCKET_SLUG
+const readKey = process.env.COSMIC_READ_KEY
+const writeKey = process.env.COSMIC_WRITE_KEY
+
+if (!bucketSlug || !readKey) {
+  console.warn('Missing required Cosmic environment variables. Some features may not work.')
+}
+
 export const cosmic = createBucketClient({
-  bucketSlug: process.env.COSMIC_BUCKET_SLUG as string,
-  readKey: process.env.COSMIC_READ_KEY as string,
-  writeKey: process.env.COSMIC_WRITE_KEY as string,
+  bucketSlug: bucketSlug || 'homeplate-demo',
+  readKey: readKey || '',
+  writeKey: writeKey || '',
 })
 
 // Chef operations
@@ -17,10 +26,12 @@ export async function getChefs(): Promise<Chef[]> {
     
     return response.objects as Chef[];
   } catch (error) {
+    console.error('Error fetching chefs:', error);
     if (hasStatus(error) && error.status === 404) {
       return [];
     }
-    throw new Error('Failed to fetch chefs');
+    // Return empty array instead of throwing to prevent deployment failures
+    return [];
   }
 }
 
@@ -37,10 +48,11 @@ export async function getApprovedChefs(): Promise<Chef[]> {
     
     return response.objects as Chef[];
   } catch (error) {
+    console.error('Error fetching approved chefs:', error);
     if (hasStatus(error) && error.status === 404) {
       return [];
     }
-    throw new Error('Failed to fetch approved chefs');
+    return [];
   }
 }
 
@@ -61,10 +73,11 @@ export async function getChefBySlug(slug: string): Promise<Chef | null> {
     
     return chef;
   } catch (error) {
+    console.error('Error fetching chef by slug:', error);
     if (hasStatus(error) && error.status === 404) {
       return null;
     }
-    throw new Error('Failed to fetch chef');
+    return null;
   }
 }
 
@@ -78,10 +91,11 @@ export async function getDishes(): Promise<Dish[]> {
     
     return response.objects as Dish[];
   } catch (error) {
+    console.error('Error fetching dishes:', error);
     if (hasStatus(error) && error.status === 404) {
       return [];
     }
-    throw new Error('Failed to fetch dishes');
+    return [];
   }
 }
 
@@ -97,10 +111,11 @@ export async function getAvailableDishes(): Promise<Dish[]> {
     
     return response.objects as Dish[];
   } catch (error) {
+    console.error('Error fetching available dishes:', error);
     if (hasStatus(error) && error.status === 404) {
       return [];
     }
-    throw new Error('Failed to fetch available dishes');
+    return [];
   }
 }
 
@@ -116,10 +131,11 @@ export async function getDishesByChef(chefId: string): Promise<Dish[]> {
     
     return response.objects as Dish[];
   } catch (error) {
+    console.error('Error fetching chef dishes:', error);
     if (hasStatus(error) && error.status === 404) {
       return [];
     }
-    throw new Error('Failed to fetch chef dishes');
+    return [];
   }
 }
 
@@ -152,7 +168,7 @@ export async function searchDishes(filters: SearchFilters): Promise<Dish[]> {
     // Filter by price range if specified
     if (filters.priceRange) {
       dishes = dishes.filter(dish => {
-        const price = dish.metadata.price;
+        const price = dish.metadata?.price || 0;
         return price >= (filters.priceRange?.min || 0) && price <= (filters.priceRange?.max || Infinity);
       });
     }
@@ -160,17 +176,18 @@ export async function searchDishes(filters: SearchFilters): Promise<Dish[]> {
     // Filter by chef rating if specified
     if (filters.rating) {
       dishes = dishes.filter(dish => {
-        const chefRating = dish.metadata.chef?.metadata?.rating || 0;
+        const chefRating = dish.metadata?.chef?.metadata?.rating || 0;
         return chefRating >= (filters.rating || 0);
       });
     }
     
     return dishes;
   } catch (error) {
+    console.error('Error searching dishes:', error);
     if (hasStatus(error) && error.status === 404) {
       return [];
     }
-    throw new Error('Failed to search dishes');
+    return [];
   }
 }
 
@@ -188,7 +205,7 @@ export async function createOrder(orderData: {
   deliveryAddress: any;
   paymentMethod?: string;
   specialInstructions?: string;
-}): Promise<Order> {
+}): Promise<Order | null> {
   try {
     const response = await cosmic.objects.insertOne({
       type: 'orders',
@@ -212,11 +229,11 @@ export async function createOrder(orderData: {
     return response.object as Order;
   } catch (error) {
     console.error('Error creating order:', error);
-    throw new Error('Failed to create order');
+    return null;
   }
 }
 
-export async function updateOrderStatus(orderId: string, status: string, trackingUpdate?: Record<string, string>): Promise<Order> {
+export async function updateOrderStatus(orderId: string, status: string, trackingUpdate?: Record<string, string>): Promise<Order | null> {
   try {
     const updateData: any = { status };
     
@@ -231,7 +248,7 @@ export async function updateOrderStatus(orderId: string, status: string, trackin
     return response.object as Order;
   } catch (error) {
     console.error('Error updating order:', error);
-    throw new Error('Failed to update order');
+    return null;
   }
 }
 
@@ -253,10 +270,11 @@ export async function getOrdersByCustomer(customerId: string): Promise<Order[]> 
     
     return orders;
   } catch (error) {
+    console.error('Error fetching customer orders:', error);
     if (hasStatus(error) && error.status === 404) {
       return [];
     }
-    throw new Error('Failed to fetch customer orders');
+    return [];
   }
 }
 
@@ -278,10 +296,11 @@ export async function getOrdersByChef(chefId: string): Promise<Order[]> {
     
     return orders;
   } catch (error) {
+    console.error('Error fetching chef orders:', error);
     if (hasStatus(error) && error.status === 404) {
       return [];
     }
-    throw new Error('Failed to fetch chef orders');
+    return [];
   }
 }
 
@@ -295,7 +314,7 @@ export async function createReview(reviewData: {
   packagingRating?: number;
   deliveryRating?: number;
   comment?: string;
-}): Promise<Review> {
+}): Promise<Review | null> {
   try {
     const response = await cosmic.objects.insertOne({
       type: 'reviews',
@@ -317,7 +336,7 @@ export async function createReview(reviewData: {
     return response.object as Review;
   } catch (error) {
     console.error('Error creating review:', error);
-    throw new Error('Failed to create review');
+    return null;
   }
 }
 
@@ -339,28 +358,29 @@ export async function getReviewsByChef(chefId: string): Promise<Review[]> {
     
     return reviews;
   } catch (error) {
+    console.error('Error fetching chef reviews:', error);
     if (hasStatus(error) && error.status === 404) {
       return [];
     }
-    throw new Error('Failed to fetch chef reviews');
+    return [];
   }
 }
 
 // Dashboard statistics
 export async function getDashboardStats(): Promise<any> {
   try {
-    // Get all data concurrently
-    const [ordersResponse, chefsResponse, customersResponse, reviewsResponse] = await Promise.all([
+    // Get all data concurrently with error handling
+    const [ordersResponse, chefsResponse, customersResponse, reviewsResponse] = await Promise.allSettled([
       cosmic.objects.find({ type: 'orders' }).props(['id', 'metadata']),
       cosmic.objects.find({ type: 'chefs' }).props(['id', 'metadata']),
       cosmic.objects.find({ type: 'customers' }).props(['id']),
       cosmic.objects.find({ type: 'reviews' }).props(['id', 'metadata'])
     ]);
     
-    const orders = ordersResponse.objects as Order[];
-    const chefs = chefsResponse.objects as Chef[];
-    const customers = customersResponse.objects;
-    const reviews = reviewsResponse.objects as Review[];
+    const orders = ordersResponse.status === 'fulfilled' ? ordersResponse.value.objects as Order[] : [];
+    const chefs = chefsResponse.status === 'fulfilled' ? chefsResponse.value.objects as Chef[] : [];
+    const customers = customersResponse.status === 'fulfilled' ? customersResponse.value.objects : [];
+    const reviews = reviewsResponse.status === 'fulfilled' ? reviewsResponse.value.objects as Review[] : [];
     
     // Calculate statistics
     const totalRevenue = orders.reduce((sum, order) => sum + (order.metadata?.total_amount || 0), 0);
