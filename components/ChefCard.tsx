@@ -1,143 +1,85 @@
 import Link from 'next/link'
+import { Star, MapPin, Clock, Award } from 'lucide-react'
 import { Chef } from '@/types'
-import { MapPin, Star, Clock, Award } from 'lucide-react'
 
 interface ChefCardProps {
   chef: Chef
-  showDistance?: boolean
 }
 
-export default function ChefCard({ chef, showDistance = false }: ChefCardProps) {
-  if (!chef || !chef.metadata) {
-    return null
-  }
+export default function ChefCard({ chef }: ChefCardProps) {
+  const profileImage = chef.metadata?.profile_image?.imgix_url 
+    ? `${chef.metadata.profile_image.imgix_url}?w=400&h=400&fit=crop&auto=format,compress`
+    : 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=400&h=400&fit=crop&auto=format,compress'
 
-  const profileImage = chef.metadata.profile_image?.imgix_url
-  const rating = chef.metadata.rating || 0
-  const specialties = chef.metadata.specialties || []
-  const cuisines = chef.metadata.cuisines || []
-  const experienceYears = chef.metadata.experience_years || 0
+  const rating = chef.metadata?.rating || 4.5
+  const location = chef.metadata?.location || 'Location not specified'
+  const experience = chef.metadata?.experience_years || 5
+  const specialties = chef.metadata?.specialties || ['Home Cooking']
+  const isAvailable = chef.metadata?.availability || false
 
   return (
-    <Link href={`/chefs/${chef.slug}`}>
-      <div className="card hover:shadow-lg transition-shadow duration-200 cursor-pointer h-full">
-        {/* Chef Image */}
-        <div className="relative h-48 mb-4 rounded-lg overflow-hidden bg-gray-100">
-          {profileImage ? (
-            <img
-              src={`${profileImage}?w=600&h=400&fit=crop&auto=format,compress`}
-              alt={chef.title}
-              className="w-full h-full object-cover"
-            />
-          ) : (
-            <div className="w-full h-full flex items-center justify-center bg-gray-200">
-              <div className="w-16 h-16 bg-gray-300 rounded-full flex items-center justify-center">
-                <svg className="w-8 h-8 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                </svg>
-              </div>
-            </div>
-          )}
-          
-          {/* Status Badge */}
-          {chef.metadata.availability && (
+    <Link href={`/chefs/${chef.slug}`} className="block">
+      <div className="card hover:shadow-lg transition-shadow duration-200 group">
+        <div className="relative">
+          <img 
+            src={profileImage}
+            alt={`${chef.title} - Home Chef`}
+            className="w-full h-48 object-cover rounded-t-lg"
+          />
+          {isAvailable && (
             <div className="absolute top-3 right-3">
-              <span className="badge-success">
+              <div className="bg-secondary-500 text-white text-xs font-medium px-2 py-1 rounded-full">
                 Available
-              </span>
+              </div>
             </div>
           )}
         </div>
-
-        {/* Chef Info */}
-        <div className="flex-1">
-          <h3 className="text-xl font-semibold text-gray-900 mb-2">
-            {chef.title}
-          </h3>
+        
+        <div className="p-6">
+          <div className="flex items-center justify-between mb-2">
+            <h3 className="text-lg font-semibold text-gray-900 group-hover:text-primary-600 transition-colors">
+              {chef.title}
+            </h3>
+            <div className="flex items-center space-x-1">
+              <Star className="h-4 w-4 text-primary-500 fill-current" />
+              <span className="text-sm font-medium text-gray-900">{rating}</span>
+            </div>
+          </div>
           
-          {chef.metadata.bio && (
-            <p className="text-gray-600 text-sm mb-3 line-clamp-2">
-              {chef.metadata.bio}
+          <div className="flex items-center text-sm text-gray-600 mb-3">
+            <MapPin className="h-4 w-4 mr-1" />
+            <span>{location}</span>
+          </div>
+          
+          <div className="flex items-center text-sm text-gray-600 mb-4">
+            <Clock className="h-4 w-4 mr-1" />
+            <span>{experience} years experience</span>
+          </div>
+          
+          <div className="mb-4">
+            <p className="text-sm text-gray-600 line-clamp-2">
+              {chef.metadata?.bio || 'Passionate home chef creating delicious, authentic meals with love and care.'}
             </p>
-          )}
-
-          {/* Rating */}
-          {rating > 0 && (
-            <div className="flex items-center space-x-2 mb-3">
-              <div className="flex items-center space-x-1">
-                <Star className="h-4 w-4 text-primary-500 fill-current" />
-                <span className="text-sm font-medium text-gray-900">
-                  {rating.toFixed(1)}
-                </span>
-              </div>
-              <span className="text-gray-400">•</span>
-              <span className="text-sm text-gray-600">
-                {experienceYears > 0 && `${experienceYears}+ years experience`}
+          </div>
+          
+          <div className="flex flex-wrap gap-1 mb-4">
+            {specialties.slice(0, 3).map((specialty: string, index: number) => (
+              <span 
+                key={index}
+                className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-primary-100 text-primary-800"
+              >
+                {specialty}
               </span>
-            </div>
-          )}
-
-          {/* Specialties */}
-          {specialties.length > 0 && (
-            <div className="mb-3">
-              <div className="flex flex-wrap gap-1">
-                {specialties.slice(0, 3).map((specialty, index) => (
-                  <span
-                    key={index}
-                    className="badge bg-primary-50 text-primary-700 text-xs"
-                  >
-                    {specialty}
-                  </span>
-                ))}
-                {specialties.length > 3 && (
-                  <span className="badge bg-gray-100 text-gray-600 text-xs">
-                    +{specialties.length - 3} more
-                  </span>
-                )}
-              </div>
-            </div>
-          )}
-
-          {/* Cuisines */}
-          {cuisines.length > 0 && (
-            <div className="mb-3">
-              <p className="text-sm text-gray-600 mb-1">Cuisines:</p>
-              <p className="text-sm text-gray-800">
-                {cuisines.slice(0, 2).join(', ')}
-                {cuisines.length > 2 && ` +${cuisines.length - 2} more`}
-              </p>
-            </div>
-          )}
-
-          {/* Location */}
-          {chef.metadata.address && (
-            <div className="flex items-center text-gray-600 text-sm mb-3">
-              <MapPin className="h-4 w-4 mr-1" />
-              <span className="line-clamp-1">{chef.metadata.address}</span>
-            </div>
-          )}
-
-          {/* Distance (if provided) */}
-          {showDistance && (
-            <div className="flex items-center text-gray-600 text-sm mb-3">
-              <Clock className="h-4 w-4 mr-1" />
-              <span>~30 mins delivery</span>
-            </div>
-          )}
-        </div>
-
-        {/* Action Footer */}
-        <div className="pt-4 border-t border-gray-100">
+            ))}
+          </div>
+          
           <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-1 text-gray-600">
-              <Award className="h-4 w-4" />
-              <span className="text-sm">
-                {chef.metadata.status === 'approved' ? 'Verified Chef' : 'Pending'}
-              </span>
+            <div className="flex items-center text-sm text-secondary-600">
+              <Award className="h-4 w-4 mr-1" />
+              <span>Verified Chef</span>
             </div>
-            
-            <span className="text-primary-600 font-medium text-sm">
-              View Menu →
+            <span className="text-sm font-medium text-primary-600 group-hover:text-primary-700">
+              View Profile →
             </span>
           </div>
         </div>

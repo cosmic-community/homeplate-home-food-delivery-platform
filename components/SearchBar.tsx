@@ -1,8 +1,8 @@
 'use client'
 
 import { useState } from 'react'
+import { Search, Filter, MapPin } from 'lucide-react'
 import { useRouter } from 'next/navigation'
-import { Search, MapPin, Filter } from 'lucide-react'
 
 export default function SearchBar() {
   const [query, setQuery] = useState('')
@@ -12,23 +12,18 @@ export default function SearchBar() {
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault()
-    
     const searchParams = new URLSearchParams()
-    if (query.trim()) {
-      searchParams.set('q', query.trim())
-    }
-    if (location.trim()) {
-      searchParams.set('location', location.trim())
-    }
     
-    const searchUrl = `/search${searchParams.toString() ? `?${searchParams.toString()}` : ''}`
-    router.push(searchUrl)
+    if (query) searchParams.set('q', query)
+    if (location) searchParams.set('location', location)
+    
+    router.push(`/search?${searchParams.toString()}`)
   }
 
   return (
     <div className="w-full max-w-4xl mx-auto">
-      <form onSubmit={handleSearch} className="bg-white rounded-lg shadow-lg border border-gray-200 p-4">
-        <div className="flex flex-col md:flex-row gap-4">
+      <form onSubmit={handleSearch} className="relative">
+        <div className="flex flex-col md:flex-row gap-2 bg-white rounded-lg shadow-lg p-2">
           {/* Search Input */}
           <div className="flex-1 relative">
             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -36,152 +31,150 @@ export default function SearchBar() {
             </div>
             <input
               type="text"
-              placeholder="Search for dishes, cuisines, or chefs..."
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              className="input pl-10 w-full"
+              placeholder="Search dishes, cuisines, or chefs..."
+              className="w-full pl-10 pr-4 py-3 text-gray-900 placeholder-gray-500 border-0 rounded-lg focus:ring-2 focus:ring-primary-500 focus:outline-none"
             />
           </div>
 
           {/* Location Input */}
-          <div className="flex-1 relative">
+          <div className="md:w-64 relative">
             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
               <MapPin className="h-5 w-5 text-gray-400" />
             </div>
             <input
               type="text"
-              placeholder="Enter your location"
               value={location}
               onChange={(e) => setLocation(e.target.value)}
-              className="input pl-10 w-full"
+              placeholder="Enter location..."
+              className="w-full pl-10 pr-4 py-3 text-gray-900 placeholder-gray-500 border-0 rounded-lg focus:ring-2 focus:ring-primary-500 focus:outline-none"
             />
           </div>
 
-          {/* Filter Button */}
-          <button
-            type="button"
-            onClick={() => setShowFilters(!showFilters)}
-            className="btn-outline flex items-center justify-center px-4 py-2 md:px-6"
-          >
-            <Filter className="h-5 w-5 mr-2" />
-            Filters
-          </button>
-
-          {/* Search Button */}
-          <button
-            type="submit"
-            className="btn-primary px-6 py-2 md:px-8"
-          >
-            Search
-          </button>
+          {/* Action Buttons */}
+          <div className="flex gap-2">
+            <button
+              type="button"
+              onClick={() => setShowFilters(!showFilters)}
+              className="flex items-center justify-center px-4 py-3 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors"
+            >
+              <Filter className="h-5 w-5" />
+              <span className="ml-2 hidden sm:inline">Filters</span>
+            </button>
+            
+            <button
+              type="submit"
+              className="flex items-center justify-center px-6 py-3 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors font-medium"
+            >
+              <Search className="h-5 w-5 md:hidden" />
+              <span className="hidden md:inline">Search</span>
+            </button>
+          </div>
         </div>
 
-        {/* Advanced Filters */}
-        {showFilters && (
-          <div className="mt-6 pt-6 border-t border-gray-200 animate-slide-up">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              {/* Cuisine Type */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Cuisine Type
-                </label>
-                <select className="input w-full">
-                  <option value="">All Cuisines</option>
-                  <option value="indian">Indian</option>
-                  <option value="chinese">Chinese</option>
-                  <option value="italian">Italian</option>
-                  <option value="mexican">Mexican</option>
-                  <option value="thai">Thai</option>
-                  <option value="mediterranean">Mediterranean</option>
-                </select>
-              </div>
-
-              {/* Price Range */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Price Range
-                </label>
-                <select className="input w-full">
-                  <option value="">Any Price</option>
-                  <option value="0-200">Under ₹200</option>
-                  <option value="200-400">₹200 - ₹400</option>
-                  <option value="400-600">₹400 - ₹600</option>
-                  <option value="600+">Above ₹600</option>
-                </select>
-              </div>
-
-              {/* Dietary Preferences */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Dietary Preferences
-                </label>
-                <select className="input w-full">
-                  <option value="">All Diets</option>
-                  <option value="vegetarian">Vegetarian</option>
-                  <option value="vegan">Vegan</option>
-                  <option value="gluten_free">Gluten Free</option>
-                  <option value="keto">Keto</option>
-                  <option value="halal">Halal</option>
-                  <option value="jain">Jain</option>
-                </select>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
-              {/* Rating */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Minimum Rating
-                </label>
-                <select className="input w-full">
-                  <option value="">Any Rating</option>
-                  <option value="4">4+ Stars</option>
-                  <option value="4.5">4.5+ Stars</option>
-                  <option value="5">5 Stars</option>
-                </select>
-              </div>
-
-              {/* Spice Level */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Spice Level
-                </label>
-                <select className="input w-full">
-                  <option value="">Any Spice Level</option>
-                  <option value="mild">Mild</option>
-                  <option value="medium">Medium</option>
-                  <option value="hot">Hot</option>
-                  <option value="extra_hot">Extra Hot</option>
-                </select>
-              </div>
-            </div>
-          </div>
-        )}
-      </form>
-
-      {/* Quick Search Tags */}
-      <div className="mt-6">
-        <p className="text-sm text-gray-600 mb-3">Popular searches:</p>
-        <div className="flex flex-wrap gap-2">
+        {/* Quick Filters */}
+        <div className="mt-4 flex flex-wrap gap-2 justify-center">
           {[
-            'Biryani', 'Pizza', 'Pasta', 'Dal Rice', 'Thali', 
-            'Chinese', 'South Indian', 'Desserts', 'Snacks'
-          ].map((tag) => (
+            'Italian',
+            'Mexican', 
+            'Asian',
+            'Vegetarian',
+            'Vegan',
+            'Gluten-Free',
+            'Under $15',
+            'Quick & Easy'
+          ].map((filter) => (
             <button
-              key={tag}
-              onClick={() => {
-                setQuery(tag)
-                const searchParams = new URLSearchParams()
-                searchParams.set('q', tag)
-                router.push(`/search?${searchParams.toString()}`)
-              }}
-              className="px-3 py-1 bg-gray-100 text-gray-700 rounded-full text-sm hover:bg-gray-200 transition-colors"
+              key={filter}
+              type="button"
+              onClick={() => setQuery(filter)}
+              className="px-3 py-1 text-sm bg-gray-100 text-gray-700 rounded-full hover:bg-primary-100 hover:text-primary-700 transition-colors"
             >
-              {tag}
+              {filter}
             </button>
           ))}
         </div>
-      </div>
+      </form>
+
+      {/* Advanced Filters Panel */}
+      {showFilters && (
+        <div className="mt-4 bg-white rounded-lg shadow-lg p-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Cuisine Type
+              </label>
+              <select className="input">
+                <option value="">Any Cuisine</option>
+                <option value="italian">Italian</option>
+                <option value="mexican">Mexican</option>
+                <option value="asian">Asian</option>
+                <option value="indian">Indian</option>
+                <option value="american">American</option>
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Price Range
+              </label>
+              <select className="input">
+                <option value="">Any Price</option>
+                <option value="0-10">$0 - $10</option>
+                <option value="10-20">$10 - $20</option>
+                <option value="20-30">$20 - $30</option>
+                <option value="30+">$30+</option>
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Dietary Preferences
+              </label>
+              <select className="input">
+                <option value="">No Preference</option>
+                <option value="vegetarian">Vegetarian</option>
+                <option value="vegan">Vegan</option>
+                <option value="gluten-free">Gluten-Free</option>
+                <option value="keto">Keto</option>
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Prep Time
+              </label>
+              <select className="input">
+                <option value="">Any Time</option>
+                <option value="0-30">Under 30 min</option>
+                <option value="30-60">30-60 min</option>
+                <option value="60+">60+ min</option>
+              </select>
+            </div>
+          </div>
+
+          <div className="mt-4 flex justify-end gap-2">
+            <button
+              type="button"
+              onClick={() => setShowFilters(false)}
+              className="btn-outline"
+            >
+              Cancel
+            </button>
+            <button
+              type="button"
+              className="btn-primary"
+              onClick={() => {
+                setShowFilters(false)
+                // Apply filters logic here
+              }}
+            >
+              Apply Filters
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

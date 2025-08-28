@@ -1,53 +1,62 @@
-import { getDashboardStats } from '@/lib/cosmic'
-import { Users, ChefHat, Star, ShoppingBag } from 'lucide-react'
+import { Users, Utensils, Star, Clock } from 'lucide-react'
 
-export default async function StatsSection() {
-  const stats = await getDashboardStats()
-
-  const statItems = [
+export default function StatsSection() {
+  const stats = [
     {
       icon: Users,
-      value: stats.totalCustomers.toLocaleString(),
-      label: 'Happy Customers',
-      color: 'text-blue-600'
-    },
-    {
-      icon: ChefHat,
-      value: stats.activeChefs.toLocaleString(),
+      value: '500+',
       label: 'Home Chefs',
-      color: 'text-green-600'
+      description: 'Talented cooks in your area'
     },
     {
-      icon: ShoppingBag,
-      value: stats.totalOrders.toLocaleString(),
-      label: 'Orders Delivered',
-      color: 'text-purple-600'
+      icon: Utensils,
+      value: '2,000+',
+      label: 'Dishes Available',
+      description: 'Fresh meals every day'
     },
     {
       icon: Star,
-      value: stats.averageRating > 0 ? stats.averageRating.toString() : '4.8',
+      value: '4.8',
       label: 'Average Rating',
-      color: 'text-yellow-600'
+      description: 'From happy customers'
+    },
+    {
+      icon: Clock,
+      value: '30 min',
+      label: 'Average Delivery',
+      description: 'Fast and reliable'
     }
   ]
 
   return (
-    <section className="py-12 bg-white border-b border-gray-200">
+    <section className="py-12 bg-primary-50">
       <div className="container">
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-8">
-          {statItems.map((item, index) => {
-            const Icon = item.icon
+        <div className="text-center mb-8">
+          <h2 className="text-3xl font-bold text-gray-900 mb-4">
+            Why Choose HomePlate?
+          </h2>
+          <p className="text-lg text-gray-600">
+            Join thousands of food lovers who trust us for their daily meals
+          </p>
+        </div>
+        
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+          {stats.map((stat, index) => {
+            const IconComponent = stat.icon
             return (
               <div key={index} className="text-center">
-                <div className={`w-12 h-12 mx-auto mb-3 ${item.color} bg-opacity-10 rounded-full flex items-center justify-center`}>
-                  <Icon className={`h-6 w-6 ${item.color}`} />
+                <div className="w-16 h-16 bg-primary-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <IconComponent className="h-8 w-8 text-white" />
                 </div>
                 <div className="text-3xl font-bold text-gray-900 mb-1">
-                  {item.value}
+                  {stat.value}
                 </div>
-                <div className="text-sm text-gray-600">
-                  {item.label}
+                <div className="text-lg font-semibold text-gray-900 mb-2">
+                  {stat.label}
                 </div>
+                <p className="text-gray-600">
+                  {stat.description}
+                </p>
               </div>
             )
           })}

@@ -1,250 +1,210 @@
-// Base Cosmic object interface
-interface CosmicObject {
-  id: string;
-  slug: string;
-  title: string;
-  content?: string;
-  metadata: Record<string, any>;
-  type: string;
-  created_at: string;
-  modified_at: string;
+export interface CosmicObject {
+  id: string
+  title: string
+  slug: string
+  status?: string
+  created_at: string
+  modified_at: string
+  metadata?: Record<string, any>
 }
 
-// Home Chef object type
 export interface Chef extends CosmicObject {
-  type: 'chefs';
-  metadata: {
-    bio?: string;
-    specialties?: string[];
-    phone?: string;
-    email?: string;
-    rating?: number;
+  metadata?: {
     profile_image?: {
-      url: string;
-      imgix_url: string;
-    };
-    license_image?: {
-      url: string;
-      imgix_url: string;
-    };
-    address?: string;
-    availability?: boolean;
-    cuisines?: string[];
-    experience_years?: number;
-    status: ChefStatus;
-    commission_rate?: number;
-  };
+      imgix_url?: string
+    }
+    bio?: string
+    email?: string
+    phone?: string
+    location?: string
+    status?: 'pending' | 'approved' | 'suspended'
+    availability?: boolean
+    specialties?: string[]
+    experience_years?: number
+    rating?: number
+    total_orders?: number
+    joined_date?: string
+    certifications?: string[]
+    social_media?: {
+      instagram?: string
+      facebook?: string
+      twitter?: string
+    }
+  }
 }
 
-// Dish object type
 export interface Dish extends CosmicObject {
-  type: 'dishes';
-  metadata: {
-    chef: Chef;
-    description?: string;
-    price: number;
-    ingredients?: string[];
-    allergens?: string[];
-    portion_size?: string;
-    prep_time?: number;
-    cuisine_type?: string;
-    dietary_preferences?: DietaryPreference[];
-    spice_level?: SpiceLevel;
-    availability?: boolean;
-    category?: string;
-    dish_image?: {
-      url: string;
-      imgix_url: string;
-    };
-    nutrition_info?: {
-      calories?: number;
-      protein?: number;
-      carbs?: number;
-      fat?: number;
-    };
-  };
+  metadata?: {
+    image?: {
+      imgix_url?: string
+    }
+    chef?: Chef
+    description?: string
+    ingredients?: string[]
+    price?: number
+    prep_time?: number
+    cook_time?: number
+    servings?: number
+    cuisine_type?: string
+    spice_level?: 'mild' | 'medium' | 'hot'
+    dietary_preferences?: string[]
+    nutritional_info?: {
+      calories?: number
+      protein?: number
+      carbs?: number
+      fat?: number
+    }
+    availability?: boolean
+    max_orders_per_day?: number
+    rating?: number
+    allergens?: string[]
+    tags?: string[]
+  }
 }
 
-// Customer object type
-export interface Customer extends CosmicObject {
-  type: 'customers';
-  metadata: {
-    email?: string;
-    phone?: string;
-    addresses?: Address[];
-    preferences?: {
-      cuisines?: string[];
-      dietary_restrictions?: string[];
-      spice_level?: SpiceLevel;
-    };
-    loyalty_points?: number;
-    profile_image?: {
-      url: string;
-      imgix_url: string;
-    };
-  };
-}
-
-// Order object type
 export interface Order extends CosmicObject {
-  type: 'orders';
-  metadata: {
-    customer: Customer;
-    chef: Chef;
-    dishes: OrderDish[];
-    status: OrderStatus;
-    total_amount: number;
-    delivery_address: Address;
-    payment_method?: PaymentMethod;
-    delivery_time?: string;
-    special_instructions?: string;
-    order_date: string;
-    estimated_delivery?: string;
-    delivery_fee?: number;
-    tax_amount?: number;
-    discount_amount?: number;
+  metadata?: {
+    customer?: Customer
+    chef?: Chef
+    dishes?: Array<{
+      dish: Dish
+      quantity: number
+      customizations?: any
+      price: number
+    }>
+    status?: 'pending' | 'confirmed' | 'preparing' | 'ready' | 'delivered' | 'cancelled'
+    total_amount?: number
+    delivery_address?: {
+      street?: string
+      city?: string
+      state?: string
+      zip?: string
+      country?: string
+      delivery_instructions?: string
+    }
+    payment_method?: string
+    payment_status?: 'pending' | 'paid' | 'failed' | 'refunded'
+    order_date?: string
+    delivery_date?: string
+    special_instructions?: string
     tracking_info?: {
-      order_placed?: string;
-      chef_accepted?: string;
-      preparation_started?: string;
-      ready_for_pickup?: string;
-      out_for_delivery?: string;
-      delivered?: string;
-    };
-  };
+      order_placed?: string
+      confirmed?: string
+      preparing?: string
+      ready?: string
+      out_for_delivery?: string
+      delivered?: string
+    }
+  }
 }
 
-// Review object type
-export interface Review extends CosmicObject {
-  type: 'reviews';
-  metadata: {
-    customer: Customer;
-    chef: Chef;
-    order: Order;
-    rating: number;
-    food_quality_rating?: number;
-    packaging_rating?: number;
-    delivery_rating?: number;
-    comment?: string;
-    review_date: string;
-    helpful_count?: number;
-  };
-}
-
-// Subscription object type
-export interface Subscription extends CosmicObject {
-  type: 'subscriptions';
-  metadata: {
-    customer: Customer;
-    chef: Chef;
-    plan_type: SubscriptionPlan;
-    status: SubscriptionStatus;
-    start_date: string;
-    end_date?: string;
-    delivery_days?: string[];
-    meal_count?: number;
-    total_amount: number;
-    auto_renewal?: boolean;
+export interface Customer extends CosmicObject {
+  metadata?: {
+    email?: string
+    first_name?: string
+    last_name?: string
+    phone?: string
+    profile_image?: {
+      imgix_url?: string
+    }
+    addresses?: Array<{
+      label?: string
+      street?: string
+      city?: string
+      state?: string
+      zip?: string
+      country?: string
+      is_default?: boolean
+    }>
     preferences?: {
-      dishes?: Dish[];
-      dietary_restrictions?: string[];
-    };
-  };
+      dietary_restrictions?: string[]
+      favorite_cuisines?: string[]
+      spice_tolerance?: 'mild' | 'medium' | 'hot'
+    }
+    loyalty_points?: number
+    total_orders?: number
+    favorite_chefs?: string[]
+    joined_date?: string
+  }
 }
 
-// Supporting types
-export interface Address {
-  label?: string;
-  street: string;
-  city: string;
-  state: string;
-  postal_code: string;
-  coordinates?: {
-    lat: number;
-    lng: number;
-  };
-  is_default?: boolean;
+export interface Review extends CosmicObject {
+  metadata?: {
+    customer?: Customer
+    chef?: Chef
+    order?: Order
+    rating?: number
+    food_quality_rating?: number
+    packaging_rating?: number
+    delivery_rating?: number
+    comment?: string
+    review_date?: string
+    helpful_count?: number
+    response?: {
+      message?: string
+      date?: string
+    }
+  }
 }
 
-export interface OrderDish {
-  dish: Dish;
-  quantity: number;
-  customizations?: {
-    spice_level?: SpiceLevel;
-    special_requests?: string;
-  };
-  price: number;
+export interface Subscription extends CosmicObject {
+  metadata?: {
+    customer?: Customer
+    plan_type?: 'weekly' | 'bi-weekly' | 'monthly'
+    meals_per_week?: number
+    price_per_meal?: number
+    total_price?: number
+    preferences?: {
+      dietary_restrictions?: string[]
+      preferred_cuisines?: string[]
+      excluded_ingredients?: string[]
+      spice_level?: 'mild' | 'medium' | 'hot'
+    }
+    delivery_schedule?: {
+      day_of_week?: string
+      time_slot?: string
+    }
+    status?: 'active' | 'paused' | 'cancelled'
+    start_date?: string
+    next_delivery?: string
+    billing_cycle?: string
+  }
 }
 
-// Type literals for select-dropdown values
-export type ChefStatus = 'pending' | 'approved' | 'suspended' | 'rejected';
-export type OrderStatus = 'pending' | 'accepted' | 'preparing' | 'ready' | 'out_for_delivery' | 'delivered' | 'cancelled';
-export type PaymentMethod = 'card' | 'upi' | 'wallet' | 'cash_on_delivery' | 'net_banking';
-export type DietaryPreference = 'vegetarian' | 'vegan' | 'gluten_free' | 'dairy_free' | 'keto' | 'halal' | 'jain';
-export type SpiceLevel = 'mild' | 'medium' | 'hot' | 'extra_hot';
-export type SubscriptionPlan = 'weekly' | 'monthly' | 'quarterly';
-export type SubscriptionStatus = 'active' | 'paused' | 'cancelled' | 'expired';
-
-// API response types
-export interface CosmicResponse<T> {
-  objects: T[];
-  total: number;
-  limit: number;
-  skip: number;
-}
-
-// Search and filter types
 export interface SearchFilters {
-  cuisine?: string;
+  cuisine?: string
+  dietary?: string[]
   priceRange?: {
-    min: number;
-    max: number;
-  };
-  rating?: number;
-  dietary?: DietaryPreference[];
-  spiceLevel?: SpiceLevel;
-  distance?: number;
-  availability?: boolean;
+    min: number
+    max: number
+  }
+  spiceLevel?: string
+  rating?: number
+  location?: string
+  availability?: boolean
 }
 
-// Dashboard statistics types
-export interface DashboardStats {
-  totalOrders: number;
-  totalRevenue: number;
-  activeChefs: number;
-  totalCustomers: number;
-  averageRating: number;
-  ordersToday: number;
-}
-
-// Type guards for runtime validation
-export function isChef(obj: CosmicObject): obj is Chef {
-  return obj.type === 'chefs';
-}
-
-export function isDish(obj: CosmicObject): obj is Dish {
-  return obj.type === 'dishes';
-}
-
-export function isOrder(obj: CosmicObject): obj is Order {
-  return obj.type === 'orders';
-}
-
-export function isCustomer(obj: CosmicObject): obj is Customer {
-  return obj.type === 'customers';
-}
-
-export function isReview(obj: CosmicObject): obj is Review {
-  return obj.type === 'reviews';
-}
-
-// Utility types
-export type CreateChefData = Omit<Chef, 'id' | 'created_at' | 'modified_at'>;
-export type CreateDishData = Omit<Dish, 'id' | 'created_at' | 'modified_at'>;
-export type CreateOrderData = Omit<Order, 'id' | 'created_at' | 'modified_at'>;
-export type UpdateOrderData = Partial<Pick<Order['metadata'], 'status' | 'tracking_info'>>;
-
-// Error helper for Cosmic SDK
+// Utility type guards
 export function hasStatus(error: unknown): error is { status: number } {
-  return typeof error === 'object' && error !== null && 'status' in error;
+  return typeof error === 'object' && error !== null && 'status' in error
+}
+
+export function isChef(obj: any): obj is Chef {
+  return obj && typeof obj === 'object' && obj.type === 'chefs'
+}
+
+export function isDish(obj: any): obj is Dish {
+  return obj && typeof obj === 'object' && obj.type === 'dishes'
+}
+
+export function isOrder(obj: any): obj is Order {
+  return obj && typeof obj === 'object' && obj.type === 'orders'
+}
+
+export function isCustomer(obj: any): obj is Customer {
+  return obj && typeof obj === 'object' && obj.type === 'customers'
+}
+
+export function isReview(obj: any): obj is Review {
+  return obj && typeof obj === 'object' && obj.type === 'reviews'
 }
